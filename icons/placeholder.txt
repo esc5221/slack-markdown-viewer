@@ -1,1 +1,0 @@
-Place icon files (icon16.png, icon48.png, icon128.png) in this directory.

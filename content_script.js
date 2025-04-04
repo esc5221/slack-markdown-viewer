@@ -97,6 +97,7 @@ const modalCss = `
     max-width: none;
     font-size: 1rem; /* 기본 16px */
     word-wrap: break-word;
+    font-weight: 550;
 }
 #slack-md-viewer-modal.dark .prose {
     color: #d1d5db; /* zinc-300 */
@@ -129,7 +130,7 @@ const modalCss = `
 #slack-md-viewer-modal .prose h3 { font-size: 1.25em; }   /* 20px */
 /* ... */
 
-#slack-md-viewer-modal .prose strong { font-weight: 600; color: inherit; }
+#slack-md-viewer-modal .prose strong { font-weight: bold; color: inherit; }
 #slack-md-viewer-modal .prose em { font-style: italic; color: inherit; }
 
 #slack-md-viewer-modal .prose blockquote {
@@ -191,10 +192,22 @@ const modalCss = `
     background-color: #18181b; /* zinc-900 */
     color: #d1d5db; /* zinc-300 */
 }
+/* 기존 스타일 확인 */
 #slack-md-viewer-modal .prose pre code {
-    background-color: transparent; border-width: 0; border-radius: 0;
-    padding: 0; font-weight: inherit; color: inherit; font-size: inherit;
-    font-family: inherit; line-height: inherit;
+    background-color: transparent; /* 이 부분이 이미 있어야 함 */
+    border-width: 0;
+    border-radius: 0;
+    padding: 0;
+    font-weight: inherit;
+    color: inherit;
+    font-size: inherit;
+    font-family: inherit;
+    line-height: inherit;
+}
+
+/* --- !! 추가: 다크 모드에서 pre 내부 code 배경 명시적 투명 처리 !! --- */
+#slack-md-viewer-modal.dark .prose pre code {
+    background-color: transparent !important;
 }
 
 /* 테이블 스타일 (프로토타입 기준) */
@@ -271,10 +284,6 @@ function createModal() {
                 </div>
             </div>
             <div class="modal-body">
-                <div id="reader-meta" class="not-prose">
-                    <h1 id="reader-title">Loading...</h1>
-                    <p id="reader-datetime"></p>
-                </div>
                 <div id="rendered-markdown" class="prose">
                     <p>Loading content...</p>
                 </div>
@@ -393,33 +402,19 @@ function showModal(markdownText) {
     if (!modalElement) return;
 
     // reader-meta 영역과 rendered-markdown 영역 선택
-    const metaTitleElement = modalElement.querySelector('#reader-title');
-    const dateTimeElement = modalElement.querySelector('#reader-datetime');
+    // const metaTitleElement = modalElement.querySelector('#reader-title');
     const contentElement = modalElement.querySelector('#rendered-markdown');
 
     try {
+        marked.setOptions({
+            gfm: true,         // Enable GitHub Flavored Markdown (tables, etc.)
+            breaks: true,      // Convert single newlines (\n) into <br> tags
+            pedantic: false,   // Don't be strict about minor ambiguities
+            smartLists: true,  // Use smarter list behavior
+            smartypants: false // Don't convert quotes/dashes to smart ones
+        });
+
         const htmlContent = marked.parse(markdownText);
-
-        // 메타 제목 설정 (파싱된 HTML에서 첫 H1 찾기)
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = htmlContent;
-        const firstH1 = tempDiv.querySelector('h1');
-        const titleText = firstH1 ? firstH1.textContent : "Slack Message";
-        metaTitleElement.textContent = titleText;
-
-        // 날짜/시간 설정 - enhanced-markdown-editor 방식으로 포맷
-        const now = new Date();
-        const formattedDate = now.toLocaleDateString('ko-KR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-        const formattedTime = now.toLocaleTimeString('ko-KR', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        });
-        dateTimeElement.textContent = `${formattedDate} ${formattedTime}`;
 
         // 본문 내용 렌더링
         contentElement.innerHTML = htmlContent;
@@ -445,6 +440,14 @@ function hideModal() {
     modalElement.classList.remove('visible');
     // 애니메이션 종료 후 DOM에서 제거하지 않고 숨김 상태로 유지
 }
+
+// ESC 키로 모달 닫기 기능 추가
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && modalElement && modalElement.classList.contains('visible')) {
+    hideModal();
+  }
+});
+
 // 메시지 요소에 뷰어 버튼 추가/관리
 function manageViewerButton(messageElement) {
     // 버튼 생성 함수
