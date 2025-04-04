@@ -2,6 +2,9 @@
 
 A browser extension that adds a button to Slack messages for viewing them in a clean Markdown reader mode.
 
+## Preview
+![Extension Screenshot](./screenshot.png)
+
 ## Features
 
 -   🔍 Hover over Slack messages to reveal a Markdown viewer button
@@ -10,6 +13,7 @@ A browser extension that adds a button to Slack messages for viewing them in a c
 -   🧩 Properly renders code blocks, lists, tables, and other Markdown elements
 -   😀 Preserves emoji and special characters
 -   ⌨️ Keyboard shortcuts (ESC to close)
+
 
 ## Installation
 
