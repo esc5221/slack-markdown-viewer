@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Slack Markdown Viewer",
+  "version": "1.1",
+  "description": "Adds a button to view Slack messages in a clean Markdown reader mode modal.",
+  "permissions": [
+    // "storage" // 필요시 로컬 스토리지 사용
+    // "scripting" // insertCSS 사용 시 필요
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://app.slack.com/*"],
+      "js": [
+        "libs/turndown.js",
+        "libs/marked.min.js", // marked.js도 content script에서 사용
+        "libs/lucide.min.js", // lucide도 content script에서 사용
+        "utils/emoji_map.js",
+        "utils/html_to_markdown.js",
+        "content_script.js"
+      ],
+      "css": ["content_style.css"] // 버튼 자체 스타일용
+    }
+  ],
+  "web_accessible_resources": [
+     // modal 관련 리소스 제거
+     // 필요한 라이브러리가 content script에서 로드되므로 빈 배열 가능
+     // 만약 아이콘 파일 등을 코드에서 직접 참조한다면 여기에 명시 필요
+    // {
+    //   "resources": [],
+    //   "matches": ["https://app.slack.com/*"]
+    // }
+  ]
+}
